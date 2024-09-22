@@ -1,20 +1,30 @@
 name: Integration
-on: [push]
+on:
+  push:
+  pull_request:
+
 jobs:
   run:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: iterative/setup-cml@v1
+      
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x' # Specify Python version
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
       - name: Train model
-        run: |
-          # Your ML workflow goes here
-          pip install -r requirements.txt
-          python train.py
+        run: python3 train.py
+
       - name: Write CML report
         run: |
-          # Post reports as comments in GitHub PRs
           cat results.txt >> report.md
           cml comment create report.md
-          
-          echo metrics.txt
+
+      - name: Output metrics
+        run: cat metrics.txt

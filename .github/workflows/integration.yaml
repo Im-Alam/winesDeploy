@@ -1,62 +1,30 @@
-name: Wine Quality Model Training and Reporting
-
+name: Integration
 on:
   push:
   pull_request:
 
 jobs:
-  train:
+  run:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
+      - uses: actions/checkout@v3
+      - uses: iterative/setup-cml@v1
+      
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.x'  # Ensure the correct Python version is used
+          python-version: '3.x' # Specify Python version
 
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Train the model
+      - name: Train model
+        run: python3 train.py
+
+      - name: Write CML report
         run: |
-          echo "Starting model training..."
-          python3 train.py  # Running your updated train.py script
-          echo "Model training completed."
+          cat metrics.txt >> report.md
+          cml comment create report.md
 
-      - name: Check if metrics.txt exists
-        run: |
-          if [ ! -f metrics.txt ]; then
-            echo "Error: metrics.txt not found!"
-            exit 1
-          fi
-
-      - name: Check if feature importance image exists
-        run: |
-          if [ ! -f feature_importance.png ]; then
-            echo "Error: feature_importance.png not found!"
-            exit 1
-          fi
-
-      - name: Generate and post CML report
-        run: |
-          echo "Generating CML report..."
-          echo "### Model Training Results" > report.md
-          cat metrics.txt >> report.md  # Append metrics to report.md
-          echo "![Feature Importance](feature_importance.png)" >> report.md  # Add the feature importance image to the report
-          cml comment create report.md  # Post the report as a comment on the pull request
-          echo "CML report generated and posted."
-
-      - name: Upload feature importance image
-        uses: actions/upload-artifact@v2
-        with:
-          name: feature_importance
-          path: feature_importance.png
-
-      - name: Upload residuals plot image
-        uses: actions/upload-artifact@v2
-        with:
-          name: residuals_plot
-          path: residuals.png
+      - name: Output metrics
+        run: cat metrics.txt

@@ -18,9 +18,7 @@ jobs:
         run: python3 train.py
 
       - name: Write CML report
-        run: |
-          cat metrics.txt >> report.md
-          cml comment create report.md
+        run: cat metrics.txt >> report.md
 
       - name: Output metrics
         run: cat metrics.txt

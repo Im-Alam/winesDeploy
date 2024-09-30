@@ -1,86 +1,50 @@
-import pandas as pd 
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor
-import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
-# Set random seed
-seed = 42
+import pandas as pd
+import matplotlib.pyplot as plt
+from keras.models import Sequential
+from keras.layers import Dense
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.model_selection import train_test_split
+import seaborn as sns
 
-################################
-########## DATA PREP ###########
-################################
 
-# Load in the data
-df = pd.read_csv("wine_quality.csv")
+df = pd.read_csv('12_30_2016_TM1(1).csv')
+df.drop(columns=['Time'], inplace=True)
 
-# Split into train and test sections
-y = df.pop("quality")
-X_train, X_test, y_train, y_test = train_test_split(df, y, test_size=0.2, random_state=seed)
 
-#################################
-########## MODELLING ############
-#################################
+scaler = StandardScaler()
+np_df = scaler.fit_transform(df)
+X = np_df[:, 1:]
+y = np_df[:, 0]
 
-# Fit a model on the train section
-regr = RandomForestRegressor(max_depth=2, random_state=seed)
-regr.fit(X_train, y_train)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Report training set score
-train_score = regr.score(X_train, y_train) * 100
-# Report test set score
-test_score = regr.score(X_test, y_test) * 100
+model = Sequential()
+model.add(Dense(64, activation='relu', input_shape=(X_train.shape[1],)))
+model.add(Dense(32, activation='relu'))
+model.add(Dense(1))
 
-# Write scores to a file
+model.compile(loss='mse', optimizer='adam')
+
+history = model.fit(X_train, y_train, epochs=100, batch_size=32, validation_split=0.2)
+
+y_pred = model.predict(X_test)
+
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
 with open("metrics.txt", 'w') as outfile:
-        outfile.write("Training variance explained: %2.1f%%\n" % train_score)
-        outfile.write("Test variance explained: %2.1f%%\n" % test_score)
+    outfile.write("Training variance explained: %2.1f%%\n" % mse)
+    outfile.write("Test variance explained: %2.1f%%\n" % r2)
 
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('Model Loss')
+plt.ylabel('Loss')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Validation'], loc='upper right')
 
-##########################################
-##### PLOT FEATURE IMPORTANCE ############
-##########################################
-# Calculate feature importance in random forest
-importances = regr.feature_importances_
-labels = df.columns
-feature_df = pd.DataFrame(list(zip(labels, importances)), columns = ["feature","importance"])
-feature_df = feature_df.sort_values(by='importance', ascending=False,)
-
-# image formatting
-axis_fs = 18 #fontsize
-title_fs = 22 #fontsize
-sns.set(style="whitegrid")
-
-ax = sns.barplot(x="importance", y="feature", data=feature_df)
-ax.set_xlabel('Importance',fontsize = axis_fs) 
-ax.set_ylabel('Feature', fontsize = axis_fs)#ylabel
-ax.set_title('Random forest\nfeature importance', fontsize = title_fs)
-
-plt.tight_layout()
 plt.savefig("feature_importance.png",dpi=120) 
 plt.close()
-
-
-##########################################
-############ PLOT RESIDUALS  #############
-##########################################
-
-y_pred = regr.predict(X_test) + np.random.normal(0,0.25,len(y_test))
-y_jitter = y_test + np.random.normal(0,0.25,len(y_test))
-res_df = pd.DataFrame(list(zip(y_jitter,y_pred)), columns = ["true","pred"])
-
-ax = sns.scatterplot(x="true", y="pred",data=res_df)
-ax.set_aspect('equal')
-ax.set_xlabel('True wine quality',fontsize = axis_fs) 
-ax.set_ylabel('Predicted wine quality', fontsize = axis_fs)#ylabel
-ax.set_title('Residuals', fontsize = title_fs)
-
-# Make it pretty- square aspect ratio
-ax.plot([1, 10], [1, 10], 'black', linewidth=1)
-plt.ylim((2.5,8.5))
-plt.xlim((2.5,8.5))
-
-
-plt.tight_layout()
-plt.savefig("residuals.png",dpi=120) 
 

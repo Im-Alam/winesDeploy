@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from keras.models import Sequential
@@ -6,10 +5,9 @@ from keras.layers import Dense
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
-import seaborn as sns
 
 
-df = pd.read_csv('12_30_2016_TM1(1).csv')
+df = pd.read_csv('12_30_2016_TM1.csv')
 df.drop(columns=['Time'], inplace=True)
 
 
@@ -35,8 +33,8 @@ mse = mean_squared_error(y_test, y_pred)
 r2 = r2_score(y_test, y_pred)
 
 with open("metrics.txt", 'w') as outfile:
-    outfile.write("Training variance explained: %2.1f%%\n" % mse)
-    outfile.write("Test variance explained: %2.1f%%\n" % r2)
+    outfile.write("Training error: %2.3f\n" % mse)
+    outfile.write("Test variance explained: %2.3f\n" % r2)
 
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
@@ -45,6 +43,6 @@ plt.ylabel('Loss')
 plt.xlabel('Epoch')
 plt.legend(['Train', 'Validation'], loc='upper right')
 
-plt.savefig("feature_importance.png",dpi=120) 
+plt.savefig("losses.png",dpi=120) 
 plt.close()
 

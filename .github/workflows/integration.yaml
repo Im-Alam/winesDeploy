@@ -2,8 +2,6 @@ name: Integration
 on:
   push:
     branches: ["main"]
-  pull_request:
-    branches: ["main"]
 
 jobs:
   run:
@@ -16,9 +14,6 @@ jobs:
 
       - name: Train model
         run: python3 train.py
-
-      - name: Write CML report
-        run: cat metrics.txt >> report.md
 
       - name: Output metrics
         run: cat metrics.txt

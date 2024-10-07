@@ -7,7 +7,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 
 
-df = pd.read_csv('12_30_2016_TM1.csv')
+df = pd.read_csv('data/12_30_2016_TM1.csv')
 df.drop(columns=['Time'], inplace=True)
 
 

@@ -1,4 +1,4 @@
 [core]
     remote = myremote
 ['remote "myremote"']
-    url = /home/imran/gitWorkspace/Data/Thermal_compensation_milling
+    url = /home/imran/gitWorkspace/Data

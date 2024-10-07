@@ -2,7 +2,8 @@ name: Retarining model on change in codebase
 on:
   push:
     branches: ["branch2"]
-  pull_requests:
+    
+  pull_request:
     branches: ["main"]
 
 jobs:

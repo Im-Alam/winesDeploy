@@ -1,17 +1,26 @@
+import pickle
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
-from keras.models import Sequential
-from keras.layers import Dense
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
-import pickle
-import os
+
+
+# Define the path to the saved model
+model_path = "models/trained_model.pkl"
+
+# Load the previously saved model using pickle
+if os.path.exists(model_path):
+    with open(model_path, 'rb') as f:
+        model = pickle.load(f)
+    print("Model loaded successfully.")
+else:
+    raise FileNotFoundError(f"Model not found at {model_path}")
 
 
 df = pd.read_csv('data/12_30_2016_TM1.csv')
 df.drop(columns=['Time'], inplace=True)
-
 
 scaler = StandardScaler()
 np_df = scaler.fit_transform(df)
@@ -19,14 +28,6 @@ X = np_df[:, 1:]
 y = np_df[:, 0]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-model = Sequential()
-model.add(Dense(64, activation='relu', input_shape=(X_train.shape[1],)))
-model.add(Dense(32, activation='relu'))
-model.add(Dense(1))
-
-model.compile(loss='mse', optimizer='adam')
-
 
 
 history = model.fit(X_train, y_train, epochs=100, batch_size=32, validation_split=0.2)

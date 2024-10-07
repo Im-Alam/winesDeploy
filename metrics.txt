@@ -1,2 +1,2 @@
-Training error: 0.021
-Test variance explained: 0.978
+Training error: 0.013
+Test variance explained: 0.987

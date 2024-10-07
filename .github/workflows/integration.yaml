@@ -1,19 +1,31 @@
-name: Integration
+name: Retarining model on change in codebase
 on:
   push:
-    branches: ["main", "branch2"]
+    branches: ["branch2"]
+  pull_requests:
+    branches: ["main"]
 
 jobs:
-  run:
+  retrain:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-      
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Train model
-        run: python3 train.py
+      - name: Train and retrain the model
+        run: python3 retrain.py 
 
-      - name: Output metrics
-        run: cat metrics.txt
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Commit and push changes
+        run: |
+          git add models/trained_model.pkl  # Add only the updated model file
+          git commit -m "Retrained model on $(date)"
+          git push origin ${{ github.ref }}

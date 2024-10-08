@@ -54,6 +54,8 @@ with open(model_output_path, 'wb') as f:
     pickle.dump(model, f)
 
 
+
+
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.title('Model Loss')
